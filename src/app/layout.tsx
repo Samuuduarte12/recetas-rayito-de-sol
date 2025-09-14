@@ -16,26 +16,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Recetas - Rayito de sol",
   description: "Rayito de sol",
+  themeColor: "#f6d748",
+  manifest: "/manifest.json",
   icons: {
     icon: "/icons/icon-512x512.png",
     apple: "/icons/apple-icon-180x180.png",
-  },
-  manifest: "/manifest.json",
-  themeColor: "#4f46e5",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Reservar Corte",
-  },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-  },
-  other: {
-    "apple-mobile-web-app-capable": "yes",
-    "mobile-web-app-capable": "yes",
   },
 }
 

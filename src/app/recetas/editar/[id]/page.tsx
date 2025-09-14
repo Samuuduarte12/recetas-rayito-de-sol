@@ -9,6 +9,7 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { MdDelete } from "react-icons/md";
 import LoadingDatos from "@/app/components/LoadingDatos";
 import { IoMdArrowRoundBack } from "react-icons/io";
+import Image from "next/image";
 
 interface Receta {
     nombre: string;
@@ -193,19 +194,16 @@ export default function EditarReceta() {
                             >
                                 {file ? "📷 Imagen seleccionada" : <FaImage className="text-2xl mx-auto" />}
                             </label>
-                            {file && (
-                                <img
-                                    src={URL.createObjectURL(file)}
-                                    alt="Preview"
-                                    className="w-full h-48 object-cover rounded-lg mt-2 border"
-                                />
-                            )}
                             {!file && form.imagen && (
-                                <img
-                                    src={form.imagen}
-                                    alt="Preview"
-                                    className="w-full h-48 object-cover rounded-lg mt-2 border"
-                                />
+                                <div className="relative w-full h-44">
+                                    <Image
+                                        src={form.imagen}
+                                        alt="Preview"
+                                        className="w-full h-48 object-cover rounded-lg mt-2 border"
+                                        fill
+                                        unoptimized
+                                    />
+                                </div>
                             )}
                         </div>
 

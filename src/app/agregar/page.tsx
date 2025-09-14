@@ -8,6 +8,7 @@ import { MdDelete } from "react-icons/md";
 import { FaImage } from "react-icons/fa6";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import LoadingDatos from "../components/LoadingDatos";
+import Image from "next/image";
 
 interface Receta {
     nombre: string;
@@ -93,7 +94,7 @@ export default function Page() {
     };
 
     return (
-        <div className={`${(loading || showModal) ? 'flex justify-center items-center ': 'font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center'} bg-[#e2d1a3] min-h-screen p-4 pb-20 sm:p-20`}>
+        <div className={`${(loading || showModal) ? 'flex justify-center items-center ' : 'font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center'} bg-[#e2d1a3] min-h-screen p-4 pb-20 sm:p-20`}>
             {(loading || showModal) ? (
                 <LoadingDatos loading={loading} mensaje="✅ Receta guardada con éxito" />
             ) : (
@@ -171,11 +172,15 @@ export default function Page() {
                                     {file ? "📷 Imagen seleccionada" : <FaImage className="text-2xl mx-auto" />}
                                 </label>
                                 {file && (
-                                    <img
-                                        src={URL.createObjectURL(file)}
-                                        alt="Preview"
-                                        className="w-full h-48 object-cover rounded-lg mt-2 border"
-                                    />
+                                    <div className="relative w-full h-44">
+                                        <Image
+                                            src={URL.createObjectURL(file)}
+                                            alt="Preview"
+                                            className="w-full h-44 object-cover rounded-lg mt-2 border"
+                                            fill
+                                            unoptimized
+                                        />
+                                    </div>
                                 )}
                             </div>
                         </div>

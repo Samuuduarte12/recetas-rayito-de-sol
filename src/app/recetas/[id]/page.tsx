@@ -7,6 +7,8 @@ import { doc, getDoc, deleteDoc } from "firebase/firestore";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import Image from "next/image";
 import Loading from "@/app/components/Loading";
+import Link from "next/link";
+import LoadingDatos from "@/app/components/LoadingDatos";
 
 interface Receta {
   nombre: string;
@@ -20,6 +22,7 @@ export default function RecetaDetalle() {
   const router = useRouter();
   const [receta, setReceta] = useState<Receta | null>(null);
   const [loading, setLoading] = useState(true);
+  const [mostrarMensaje, setMostrarMensaje] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchReceta = async () => {
@@ -48,16 +51,20 @@ export default function RecetaDetalle() {
     try {
       const id = Array.isArray(params.id) ? params.id[0] : params.id;
       await deleteDoc(doc(db, "rayito-recetas", id));
-      alert("Receta eliminada con éxito");
-      router.push("/"); // redirige al home
+      setMostrarMensaje(true)
+      setTimeout(() => {
+        setMostrarMensaje(false)
+      }, 3000);
+      router.push("/");
     } catch (error) {
       console.error("Error eliminando receta:", error);
       alert("Error al eliminar la receta");
-    }
+    }    
   };
 
   return (
     <div className=" p-4 sm:p-20 bg-[#fef3c7] min-h-screen">
+      {mostrarMensaje && <LoadingDatos loading={loading} mensaje="Receta Eliminada con éxito"/>}
       {loading ? (
         <Loading />
       ) : (
@@ -74,13 +81,13 @@ export default function RecetaDetalle() {
 
             <div className="flex gap-2">
               {/* Botón Editar */}
-              <button
-                onClick={() => router.push(`/recetas/editar/${params.id}`)} // ruta para editar
+              <Link
+                href={`/recetas/editar/${params.id}`}
                 className="flex items-center gap-1 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
                 title="Editar receta"
               >
                 <AiOutlineEdit className="text-lg" />
-              </button>
+              </Link>
 
               {/* Botón Eliminar */}
               <button
