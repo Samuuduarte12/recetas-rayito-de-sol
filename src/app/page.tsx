@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useRecetas, Receta } from "@/app/hooks/useRecetas";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import Loading from "./components/Loading";
 import Link from "next/link";
 
