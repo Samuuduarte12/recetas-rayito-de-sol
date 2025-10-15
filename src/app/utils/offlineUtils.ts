@@ -35,17 +35,18 @@ export const generateOfflineId = (): string => {
   return `offline-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 };
 
-export const validateOfflineData = (data: any): boolean => {
+export const validateOfflineData = (data: unknown): boolean => {
   try {
     return (
-      data &&
+      data !== null &&
       typeof data === 'object' &&
-      data.nombre &&
-      typeof data.nombre === 'string' &&
-      data.nombre.trim().length > 0 &&
-      data.ingredientes &&
-      Array.isArray(data.ingredientes) &&
-      data.ingredientes.length > 0
+      data !== undefined &&
+      'nombre' in data &&
+      typeof (data as { nombre: unknown }).nombre === 'string' &&
+      ((data as { nombre: string }).nombre.trim().length > 0) &&
+      'ingredientes' in data &&
+      Array.isArray((data as { ingredientes: unknown }).ingredientes) &&
+      ((data as { ingredientes: unknown[] }).ingredientes.length > 0)
     );
   } catch {
     return false;
@@ -55,7 +56,7 @@ export const validateOfflineData = (data: any): boolean => {
 export const getStorageSize = (): string => {
   try {
     let total = 0;
-    for (let key in localStorage) {
+    for (const key in localStorage) {
       if (localStorage.hasOwnProperty(key)) {
         total += localStorage[key].length + key.length;
       }

@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs } from "firebase/firestore";
-import { useOfflineStorage, OfflineReceta } from "./useOfflineStorage";
+import { useOfflineStorage } from "./useOfflineStorage";
 
 export interface Receta {
   id: string;
@@ -18,15 +18,7 @@ export const useRecetas = () => {
   const [loading, setLoading] = useState(true);
   const { isOnline, offlineRecetas, loadOfflineData } = useOfflineStorage();
 
-  useEffect(() => {
-    if (isOnline) {
-      fetchRecetasFromFirebase();
-    } else {
-      loadRecetasFromOffline();
-    }
-  }, [isOnline]);
-
-  const fetchRecetasFromFirebase = async () => {
+  const fetchRecetasFromFirebase = useCallback(async () => {
     try {
       setLoading(true);
       const querySnapshot = await getDocs(collection(db, "rayito-recetas"));
@@ -43,18 +35,25 @@ export const useRecetas = () => {
     } catch (error) {
       console.error('Error fetching from Firebase:', error);
       // Si falla Firebase, usar datos offline
-      loadRecetasFromOffline();
+      setLoading(true);
+      loadOfflineData();
+      setRecetas(offlineRecetas);
+      setLoading(false);
     }
-  };
+  }, [offlineRecetas, loadOfflineData]);
 
-  const loadRecetasFromOffline = () => {
-    setLoading(true);
-    loadOfflineData();
-    setRecetas(offlineRecetas);
-    setLoading(false);
-  };
+  useEffect(() => {
+    if (isOnline) {
+      fetchRecetasFromFirebase();
+    } else {
+      setLoading(true);
+      loadOfflineData();
+      setRecetas(offlineRecetas);
+      setLoading(false);
+    }
+  }, [isOnline, fetchRecetasFromFirebase, offlineRecetas, loadOfflineData]);
 
-  const addReceta = async (recetaData: Omit<Receta, "id">) => {
+  const addReceta = useCallback(async (recetaData: Omit<Receta, "id">) => {
     if (isOnline) {
       try {
         // Aquí implementarías la lógica para guardar en Firebase
@@ -71,13 +70,17 @@ export const useRecetas = () => {
         throw error;
       }
     } else {
-      // Guardar offline
-      const { saveRecetaOffline } = useOfflineStorage();
-      const newReceta = saveRecetaOffline(recetaData);
+      // Guardar offline - necesitamos acceder al hook de forma diferente
+      const newReceta: Receta = {
+        ...recetaData,
+        id: `offline-${Date.now()}`,
+        isOffline: true,
+        timestamp: Date.now()
+      };
       setRecetas(prev => [...prev, newReceta]);
       return newReceta;
     }
-  };
+  }, [isOnline]);
 
   return { 
     recetas, 

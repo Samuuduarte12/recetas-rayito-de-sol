@@ -16,28 +16,12 @@ const PENDING_ACTIONS_KEY = 'pending-actions';
 export const useOfflineStorage = () => {
   const [isOnline, setIsOnline] = useState(true);
   const [offlineRecetas, setOfflineRecetas] = useState<OfflineReceta[]>([]);
-  const [pendingActions, setPendingActions] = useState<any[]>([]);
-
-  // Detectar estado de conexión
-  useEffect(() => {
-    const handleOnline = () => setIsOnline(true);
-    const handleOffline = () => setIsOnline(false);
-
-    setIsOnline(navigator.onLine);
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
-  }, []);
-
-  // Cargar datos offline al iniciar
-  useEffect(() => {
-    loadOfflineData();
-    loadPendingActions();
-  }, []);
+  const [pendingActions, setPendingActions] = useState<Array<{
+    type: 'CREATE' | 'UPDATE' | 'DELETE';
+    id?: string;
+    data?: unknown;
+    timestamp: number;
+  }>>([]);
 
   const loadOfflineData = useCallback(() => {
     try {
@@ -63,6 +47,27 @@ export const useOfflineStorage = () => {
     }
   }, []);
 
+  // Detectar estado de conexión
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    setIsOnline(navigator.onLine);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Cargar datos offline al iniciar
+  useEffect(() => {
+    loadOfflineData();
+    loadPendingActions();
+  }, [loadOfflineData, loadPendingActions]);
+
   const saveOfflineData = useCallback((recetas: OfflineReceta[]) => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(recetas));
@@ -72,7 +77,11 @@ export const useOfflineStorage = () => {
     }
   }, []);
 
-  const addPendingAction = useCallback((action: any) => {
+  const addPendingAction = useCallback((action: {
+    type: 'CREATE' | 'UPDATE' | 'DELETE';
+    id?: string;
+    data?: unknown;
+  }) => {
     const newActions = [...pendingActions, { ...action, timestamp: Date.now() }];
     try {
       localStorage.setItem(PENDING_ACTIONS_KEY, JSON.stringify(newActions));
@@ -154,7 +163,7 @@ export const useOfflineStorage = () => {
     if (isOnline && pendingActions.length > 0) {
       syncWithFirebase();
     }
-  }, [isOnline, syncWithFirebase]);
+  }, [isOnline, pendingActions.length, syncWithFirebase]);
 
   return {
     isOnline,
@@ -164,6 +173,7 @@ export const useOfflineStorage = () => {
     updateRecetaOffline,
     deleteRecetaOffline,
     syncWithFirebase,
-    loadOfflineData
+    loadOfflineData,
+    clearPendingActions
   };
 };
