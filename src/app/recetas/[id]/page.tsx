@@ -41,7 +41,8 @@ export default function RecetaDetalle() {
         let imagenUrl = '';
         if (Array.isArray(recetaData.imagen) && recetaData.imagen.length > 0) {
           // Si es array, tomar la primera URL
-          imagenUrl = recetaData.imagen[0].url || recetaData.imagen[0];
+          const firstImage = recetaData.imagen[0];
+          imagenUrl = typeof firstImage === 'string' ? firstImage : firstImage.url || '';
         } else if (typeof recetaData.imagen === 'string') {
           imagenUrl = recetaData.imagen;
         }

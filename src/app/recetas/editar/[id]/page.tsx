@@ -48,7 +48,8 @@ export default function EditarReceta() {
                 let imagenUrl = '';
                 if (Array.isArray(receta.imagen) && receta.imagen.length > 0) {
                     // Si es array, tomar la primera URL
-                    imagenUrl = receta.imagen[0].url || receta.imagen[0];
+                    const firstImage = receta.imagen[0];
+                    imagenUrl = typeof firstImage === 'string' ? firstImage : firstImage.url || '';
                 } else if (typeof receta.imagen === 'string') {
                     imagenUrl = receta.imagen;
                 }
@@ -328,6 +329,7 @@ export default function EditarReceta() {
                                     <div className="grid grid-cols-3 gap-2 mt-4">
                                         {Array.from(files).map((file, i) => (
                                             <div key={i} className="relative aspect-square rounded-lg overflow-hidden shadow-md">
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
                                                 <img
                                                     src={URL.createObjectURL(file)}
                                                     className="w-full h-full object-cover"

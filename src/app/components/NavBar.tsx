@@ -3,7 +3,6 @@ import React from 'react'
 import { usePathname } from 'next/navigation';
 import { IoHomeOutline, IoHomeSharp } from "react-icons/io5";
 import { TiPlusOutline, TiPlus } from "react-icons/ti";
-import { MdInfoOutline, MdInfo } from "react-icons/md";
 import Link from 'next/link'
 
 export default function NavBar() {

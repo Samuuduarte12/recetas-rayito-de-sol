@@ -6,13 +6,34 @@ interface ApiError extends Error {
   status?: number;
 }
 
+// Tipos para las respuestas de la API
+export interface RecetaResponse {
+  _id?: string;
+  id?: string;
+  nombre: string;
+  descripcion: string;
+  ingredientes: string[];
+  imagen: string | Array<{ url: string; public_id: string; tipo: string }>;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface RecetaCreateResponse extends RecetaResponse {
+  _id: string;
+  id: string;
+}
+
+export interface DeleteResponse {
+  message: string;
+}
+
 /**
  * Crea una nueva receta en el backend
  * @param {FormData} formData - Los datos del formulario incluyendo nombre, descripcion, ingredientes e imágenes
  * @returns {Promise<Object>} - La receta creada
  * @throws {ApiError} - Si hay un error al crear la receta
  */
-export const createRecipe = async (formData: FormData): Promise<any> => {
+export const createRecipe = async (formData: FormData): Promise<RecetaCreateResponse> => {
   try {
     const res = await fetch(API_URL, {
       method: 'POST',
@@ -28,7 +49,7 @@ export const createRecipe = async (formData: FormData): Promise<any> => {
       try {
         const errorData = JSON.parse(responseText);
         errorMessage = errorData.message || errorMessage;
-      } catch (parseError) {
+      } catch {
         // Si no es JSON, usar el texto directamente si no está vacío
         if (responseText.trim()) {
           errorMessage = responseText;
@@ -55,7 +76,7 @@ export const createRecipe = async (formData: FormData): Promise<any> => {
  * @returns {Promise<Array>} - Array de recetas
  * @throws {Error} - Si hay un error al obtener las recetas
  */
-export const getRecipes = async (): Promise<any[]> => {
+export const getRecipes = async (): Promise<RecetaResponse[]> => {
   try {
     const res = await fetch(API_URL);
 
@@ -76,7 +97,7 @@ export const getRecipes = async (): Promise<any[]> => {
  * @returns {Promise<Object>} - La receta encontrada
  * @throws {Error} - Si hay un error al obtener la receta
  */
-export const getRecipeById = async (id: string): Promise<any> => {
+export const getRecipeById = async (id: string): Promise<RecetaResponse> => {
   try {
     const res = await fetch(`${API_URL}/${id}`);
 
@@ -98,7 +119,7 @@ export const getRecipeById = async (id: string): Promise<any> => {
  * @returns {Promise<Object>} - La receta actualizada
  * @throws {ApiError} - Si hay un error al actualizar la receta
  */
-export const updateRecipe = async (id: string, formData: FormData): Promise<any> => {
+export const updateRecipe = async (id: string, formData: FormData): Promise<RecetaResponse> => {
   try {
     const res = await fetch(`${API_URL}/${id}`, {
       method: 'PUT',
@@ -112,7 +133,7 @@ export const updateRecipe = async (id: string, formData: FormData): Promise<any>
       try {
         const errorData = JSON.parse(responseText);
         errorMessage = errorData.message || errorMessage;
-      } catch (parseError) {
+      } catch {
         if (responseText.trim()) {
           errorMessage = responseText;
         }
@@ -136,7 +157,7 @@ export const updateRecipe = async (id: string, formData: FormData): Promise<any>
  * @returns {Promise<Object>} - Mensaje de confirmación
  * @throws {Error} - Si hay un error al eliminar la receta
  */
-export const deleteRecipe = async (id: string): Promise<any> => {
+export const deleteRecipe = async (id: string): Promise<DeleteResponse> => {
   try {
     const res = await fetch(`${API_URL}/${id}`, {
       method: 'DELETE',

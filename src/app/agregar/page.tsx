@@ -229,6 +229,7 @@ export default function CreateRecipePage() {
                         <div className="grid grid-cols-3 gap-2 mt-4">
                             {Array.from(imagen).map((img, i) => (
                                 <div key={i} className="relative aspect-square rounded-lg overflow-hidden shadow-md">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={URL.createObjectURL(img)}
                                         className="w-full h-full object-cover"

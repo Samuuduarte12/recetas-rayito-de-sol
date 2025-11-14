@@ -17,6 +17,16 @@ export default function Home() {
     r.nombre.toLowerCase().includes(search.toLowerCase())
   );
 
+  // Función helper para obtener la URL de la imagen
+  const getImageUrl = (imagen: string | Array<{ url: string; public_id: string; tipo: string }> | undefined): string | null => {
+    if (!imagen) return null;
+    if (typeof imagen === 'string') return imagen;
+    if (Array.isArray(imagen) && imagen.length > 0) {
+      return imagen[0].url || (typeof imagen[0] === 'string' ? imagen[0] : null);
+    }
+    return null;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#e2d1a3] to-[#f5e4b8] pb-24">
       {/* Header con logo */}
@@ -66,41 +76,44 @@ export default function Home() {
           <>
             {recetasFiltradas.length > 0 ? (
               <div className="grid grid-cols-2 gap-3">
-                {recetasFiltradas.map((receta: Receta) => (
-                  <Link
-                    key={receta.id}
-                    href={`/recetas/${receta.id}`}
-                    className="group bg-[#f6d748] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden relative transform hover:-translate-y-1"
-                  >
-                    <OfflineBadge isOffline={receta.isOffline} />
-                    <div className="relative w-full h-40 overflow-hidden">
-                      {receta.imagen ? (
-                        <Image
-                          src={receta.imagen}
-                          alt={receta.nombre}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
-                          unoptimized
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-[#f6d748] to-[#f5e4b8] flex items-center justify-center">
-                          <span className="text-4xl">🍳</span>
-                        </div>
-                      )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
-                    </div>
-                    <div className="p-3">
-                      <h3 className="text-sm font-bold text-gray-800 text-center line-clamp-2 min-h-[2.5rem]">
-                        {receta.nombre}
-                      </h3>
-                      {receta.isOffline && (
-                        <p className="text-xs text-gray-600 text-center mt-1.5">
-                          ⚡ Offline
-                        </p>
-                      )}
-                    </div>
-                  </Link>
-                ))}
+                {recetasFiltradas.map((receta: Receta) => {
+                  const imageUrl = getImageUrl(receta.imagen);
+                  return (
+                    <Link
+                      key={receta.id}
+                      href={`/recetas/${receta.id}`}
+                      className="group bg-[#f6d748] rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden relative transform hover:-translate-y-1"
+                    >
+                      <OfflineBadge isOffline={receta.isOffline} />
+                      <div className="relative w-full h-40 overflow-hidden">
+                        {imageUrl ? (
+                          <Image
+                            src={imageUrl}
+                            alt={receta.nombre}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            unoptimized
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-[#f6d748] to-[#f5e4b8] flex items-center justify-center">
+                            <span className="text-4xl">🍳</span>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+                      </div>
+                      <div className="p-3">
+                        <h3 className="text-sm font-bold text-gray-800 text-center line-clamp-2 min-h-[2.5rem]">
+                          {receta.nombre}
+                        </h3>
+                        {receta.isOffline && (
+                          <p className="text-xs text-gray-600 text-center mt-1.5">
+                            ⚡ Offline
+                          </p>
+                        )}
+                      </div>
+                    </Link>
+                  );
+                })}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-16 px-4">

@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { getRecipes } from "../../lib/api";
+import { getRecipes, RecetaResponse } from "../../lib/api";
 import { useOfflineStorage } from "./useOfflineStorage";
 
 export interface Receta {
@@ -26,7 +26,7 @@ export const useRecetas = () => {
       const backendRecetas = await getRecipes();
       
       // Transformar las recetas del backend al formato esperado
-      const transformedRecetas: Receta[] = backendRecetas.map((receta: any) => {
+      const transformedRecetas: Receta[] = backendRecetas.map((receta: RecetaResponse) => {
         // El backend devuelve _id, pero necesitamos id
         const id = receta._id || receta.id;
         
@@ -34,7 +34,8 @@ export const useRecetas = () => {
         let imagenUrl = '';
         if (Array.isArray(receta.imagen) && receta.imagen.length > 0) {
           // Si es array, tomar la primera URL
-          imagenUrl = receta.imagen[0].url || receta.imagen[0];
+          const firstImage = receta.imagen[0];
+          imagenUrl = typeof firstImage === 'string' ? firstImage : firstImage.url || '';
         } else if (typeof receta.imagen === 'string') {
           imagenUrl = receta.imagen;
         }
