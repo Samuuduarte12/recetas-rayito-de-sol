@@ -1,16 +1,18 @@
 import { useEffect, useState, useCallback } from "react";
-import { db } from "@/lib/firebase";
-import { collection, getDocs } from "firebase/firestore";
+import { getRecipes } from "../../lib/api";
 import { useOfflineStorage } from "./useOfflineStorage";
 
 export interface Receta {
+  _id?: string;
   id: string;
   nombre: string;
   descripcion: string;
   ingredientes: string[];
-  imagen: string;
+  imagen: string | Array<{ url: string; public_id: string; tipo: string }>;
   isOffline?: boolean;
   timestamp?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export const useRecetas = () => {
@@ -18,23 +20,44 @@ export const useRecetas = () => {
   const [loading, setLoading] = useState(true);
   const { isOnline, offlineRecetas, loadOfflineData } = useOfflineStorage();
 
-  const fetchRecetasFromFirebase = useCallback(async () => {
+  const fetchRecetasFromBackend = useCallback(async () => {
     try {
       setLoading(true);
-      const querySnapshot = await getDocs(collection(db, "rayito-recetas"));
-      const firebaseRecetas: Receta[] = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...(doc.data() as Omit<Receta, "id">),
-        isOffline: false
-      }));
+      const backendRecetas = await getRecipes();
+      
+      // Transformar las recetas del backend al formato esperado
+      const transformedRecetas: Receta[] = backendRecetas.map((receta: any) => {
+        // El backend devuelve _id, pero necesitamos id
+        const id = receta._id || receta.id;
+        
+        // Manejar imágenes: puede ser string o array de objetos
+        let imagenUrl = '';
+        if (Array.isArray(receta.imagen) && receta.imagen.length > 0) {
+          // Si es array, tomar la primera URL
+          imagenUrl = receta.imagen[0].url || receta.imagen[0];
+        } else if (typeof receta.imagen === 'string') {
+          imagenUrl = receta.imagen;
+        }
+        
+        return {
+          id,
+          nombre: receta.nombre,
+          descripcion: receta.descripcion,
+          ingredientes: receta.ingredientes || [],
+          imagen: imagenUrl,
+          isOffline: false,
+          createdAt: receta.createdAt,
+          updatedAt: receta.updatedAt
+        };
+      });
 
-      // Combinar recetas de Firebase con las offline
-      const combinedRecetas = [...firebaseRecetas, ...offlineRecetas];
+      // Combinar recetas del backend con las offline
+      const combinedRecetas = [...transformedRecetas, ...offlineRecetas];
       setRecetas(combinedRecetas);
       setLoading(false);
     } catch (error) {
-      console.error('Error fetching from Firebase:', error);
-      // Si falla Firebase, usar datos offline
+      console.error('Error fetching from backend:', error);
+      // Si falla el backend, usar datos offline
       setLoading(true);
       loadOfflineData();
       setRecetas(offlineRecetas);
@@ -44,14 +67,14 @@ export const useRecetas = () => {
 
   useEffect(() => {
     if (isOnline) {
-      fetchRecetasFromFirebase();
+      fetchRecetasFromBackend();
     } else {
       setLoading(true);
       loadOfflineData();
       setRecetas(offlineRecetas);
       setLoading(false);
     }
-  }, [isOnline, fetchRecetasFromFirebase, offlineRecetas, loadOfflineData]);
+  }, [isOnline, fetchRecetasFromBackend, offlineRecetas, loadOfflineData]);
 
   const addReceta = useCallback(async (recetaData: Omit<Receta, "id">) => {
     if (isOnline) {

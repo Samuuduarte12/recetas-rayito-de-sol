@@ -15,23 +15,20 @@ export default function NavBar() {
             href: "/",
             icon: IoHomeOutline,
             activeIcon: IoHomeSharp,
+            label: "Inicio",
         },
         {
             id: 2,
             href: "/agregar",
             icon: TiPlusOutline,
             activeIcon: TiPlus,
-        },
-        {
-            id: 3,
-            href: "/offline",
-            icon: MdInfoOutline,
-            activeIcon: MdInfo,
-        },
+            label: "Agregar",
+        },        
     ];
+    
     return (
-        <nav className="fixed bottom-0 left-0 w-full bg-[#f6d748] border-t border-black shadow-lg">
-            <div className="flex justify-around items-center h-12">
+        <nav className="fixed bottom-0 left-0 right-0 w-full bg-white border-t-2 border-[#e2d1a3] shadow-2xl z-50 safe-area-bottom">
+            <div className="flex justify-around items-center h-16 ">
                 {tabs.map((tab) => {
                     const isActive = pathname === tab.href;
                     const Icon = isActive ? tab.activeIcon : tab.icon;
@@ -40,14 +37,20 @@ export default function NavBar() {
                         <Link
                             key={tab.id}
                             href={tab.href}
-                            className={`flex justify-center items-center transition-colors w-1/3 h-full ${isActive ? "text-white text-3xl" : "text-gray-500 text-3xl"}`}
+                            className={`flex flex-col justify-center items-center transition-all w-1/2 h-full ${
+                                isActive 
+                                    ? "bg-[#f6d748] text-gray-800 shadow-md" 
+                                    : "text-gray-500 hover:text-gray-700"
+                            }`}
                         >
-                            <Icon />
+                            <Icon className={`${isActive ? "text-2xl" : "text-xl"} transition-transform ${isActive ? "scale-110" : ""}`} />
+                            <span className={`text-xs font-semibold mt-0.5 ${isActive ? "text-gray-800" : "text-gray-500"}`}>
+                                {tab.label}
+                            </span>
                         </Link>
                     );
                 })}
             </div>
         </nav>
-
     )
 }
